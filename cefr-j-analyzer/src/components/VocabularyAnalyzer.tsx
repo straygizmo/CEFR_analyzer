@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { processText } from '../services/textProcessor';
-import { analyzeVocabularyLevel, VocabularyLevel, VocabularyMetrics } from '../services/levelCalculator';
+import type { VocabularyLevel, VocabularyMetrics } from '../services/levelCalculator';
+import { analyzeVocabularyLevel } from '../services/levelCalculator';
 
 const SAMPLE_TEXT = `Writing is the act of recording language on a visual medium using a set of symbols. The symbols must be known to others, so that the text may be read. A text may also use other visual systems, such as illustrations and decorations. These are not called writing, but may help the message work. Usually, all educated people in a country use the same writing system to record the same language. To be able to read and write is to be literate.`;
 
@@ -93,7 +94,7 @@ export function VocabularyAnalyzer() {
     <div className="max-w-6xl mx-auto p-6">
       <h2 className="text-3xl font-bold mb-6">
         <a href="/" className="text-blue-600 hover:underline">
-          CVLA: CEFR-based Vocabulary Level Analyzer (ver. 3.0)
+          CVLA: CEFR-based Vocabulary Level Analyzer
         </a>
       </h2>
 

@@ -1,5 +1,5 @@
-import { ProcessedText, Token, countContentWords, extractNounPhrases, getUniquePOSCount } from './textProcessor';
-import { calculateARI } from './textProcessor';
+import type { ProcessedText, Token } from './textProcessor';
+import { countContentWords, extractNounPhrases, getUniquePOSCount, calculateARI } from './textProcessor';
 import vocabularyIndex from '../data/vocabulary-index.json';
 
 // Word frequency data (simplified - in production, load from external source)

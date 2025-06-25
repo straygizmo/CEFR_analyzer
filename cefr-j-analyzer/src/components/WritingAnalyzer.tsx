@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { analyzeWriting, WritingAnalysisResult } from '../services/writingAnalyzer';
+import type { WritingAnalysisResult } from '../services/writingAnalyzer';
+import { analyzeWriting } from '../services/writingAnalyzer';
 
 const SAMPLE_TEXT = `I agree that parents should limit the amount of time children spend online. First, we may get bad from using the Internet for long time, for example, lack of sleep, bad eyes. Second, we have less comunication with family and friends. If you spend a lot on Internet, you will see a decrese in your relationship with your friends and your social skills. For these reasons, I am for limiting time children spend online.`;
 
@@ -151,7 +152,7 @@ export function WritingAnalyzer() {
     <div className="max-w-6xl mx-auto p-6">
       <h2 className="text-3xl font-bold mb-6">
         <a href="/" className="text-blue-600 hover:underline">
-          CWLA2.1: CEFR-based Writing Level Analyzer
+          CWLA: CEFR-based Writing Level Analyzer
         </a>
       </h2>
 
@@ -160,7 +161,7 @@ export function WritingAnalyzer() {
           <div className="bg-green-50 p-4 rounded">
             <h3 className="text-green-700 font-semibold mb-2">About</h3>
             <p className="text-sm">
-              CWLA2 estimates the CEFR-J level of English learners' writing (preA1, A1.1, A1.2, A1.3, A2.1, A2.2, B1.1, B1.2, B2.1, B2.2, C1, C2). 
+              CWLA estimates the CEFR-J level of English learners' writing (preA1, A1.1, A1.2, A1.3, A2.1, A2.2, B1.1, B1.2, B2.1, B2.2, C1, C2). 
               Please input text between 10 and 500 words. The tool is primarily designed for high school-level compositions.
             </p>
           </div>
@@ -298,7 +299,7 @@ export function WritingAnalyzer() {
         // Assess Writing Results
         <div className="space-y-6">
           <h2 className="text-2xl font-bold">
-            <span className="bg-blue-600 text-white px-3 py-1 rounded">CWLA2 Evaluation Results</span>
+            <span className="bg-blue-600 text-white px-3 py-1 rounded">Writing Evaluation Results</span>
           </h2>
           
           <h4 className="text-xl font-semibold">CEFR-J Level: {results.level}</h4>
