@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { processText } from '../services/textProcessor';
 import type { VocabularyLevel, VocabularyMetrics } from '../services/levelCalculator';
 import { analyzeVocabularyLevel } from '../services/levelCalculator';
@@ -316,6 +316,109 @@ export function VocabularyAnalyzer() {
           <p className="text-sm text-gray-600">
             #Cells highlighted in gray are not used for level assessment.
           </p>
+
+          <div className="mt-8">
+            <h3 className="text-xl font-bold mb-4">Indicator Descriptions</h3>
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-semibold">
+                  AvrDiff
+                  <span className="font-normal text-sm text-gray-600 ml-2">
+                    = {results.metrics.avrDiff.toFixed(2)} (Score: {(results.metricScores?.avrDiff || 0).toFixed(2)} = {results.metrics.avrDiff.toFixed(2)} × 6.417 - 7.184)
+                  </span>
+                </h4>
+                <p className="text-sm text-gray-700">
+                  This index shows the average of word difficulties when A1 is 1, A2 is 2, B1 is 3, B2 is 4, C1 is 5, and C2 is 6. Word levels are determined based on CEFR-J Wordlist and English Vocabulary Profile for C level words. Functional words are excluded from the calculation. If this index is high, you can lower the text level by replacing higher level words with easier ones (e.g., "inform" (B1) → "tell" (A1)).
+                </p>
+              </div>
+
+              <div>
+                <h4 className="font-semibold">
+                  BperA
+                  <span className="font-normal text-sm text-gray-600 ml-2">
+                    = {results.metrics.bperA.toFixed(2)} (Score: {(results.metricScores?.bperA || 0).toFixed(2)} = {results.metrics.bperA.toFixed(2)} × 13.146 + 0.428)
+                  </span>
+                </h4>
+                <p className="text-sm text-gray-700">
+                  This shows the ratio of B level content words against A level content words (nouns, verbs, adjectives, and adverbs). If this index is high, you can lower the text level by avoiding B level words.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="font-semibold">
+                  CVV1
+                  <span className="font-normal text-sm text-gray-600 ml-2">
+                    = {results.metrics.cvv1.toFixed(2)} (Score: {(results.metricScores?.cvv1 || 0).toFixed(2)} = {results.metrics.cvv1.toFixed(2)} × 1.1059 - 1.208)
+                  </span>
+                </h4>
+                <p className="text-sm text-gray-700">
+                  CVV1 is a measure of vocabulary diversity. It is calculated as the ratio of unique verbs to the square root of the total number of verbs times two. A higher CVV1 indicates greater vocabulary diversity, which may suggest a higher text level. If this index is high, you can lower the text level by reducing vocabulary diversity.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="font-semibold">
+                  AvrFreqRank
+                  <span className="font-normal text-sm text-gray-600 ml-2">
+                    = {results.metrics.avrFreqRank.toFixed(2)} (Score: {(results.metricScores?.avrFreqRank || 0).toFixed(2)} = {results.metrics.avrFreqRank.toFixed(2)} × 0.004 - 0.608)
+                  </span>
+                </h4>
+                <p className="text-sm text-gray-700">
+                  AvrFreqRank represents the average frequency rank of the words in the text including functional words. A lower value indicates that more common words are used, potentially suggesting a lower text level. The three least frequent words are excluded to avoid anomalies. If this index is high, you can reduce the text level by using more common words.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="font-semibold">
+                  ARI
+                  <span className="font-normal text-sm text-gray-600 ml-2">
+                    = {results.metrics.ari.toFixed(2)} (Score: {(results.metricScores?.ari || 0).toFixed(2)} = {results.metrics.ari.toFixed(2)} × 0.607 - 1.632)
+                  </span>
+                </h4>
+                <p className="text-sm text-gray-700">
+                  ARI is a readability index which is calculated using the following formula (using Python textstat library):<br />
+                  4.71(characters/words) + 0.5(words/sentences) - 21.43<br />
+                  This index is sensitive to sentence and word lengths. If this index is high, you can lower the text level by separating sentences or using shorter words.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="font-semibold">
+                  VperSent
+                  <span className="font-normal text-sm text-gray-600 ml-2">
+                    = {results.metrics.vperSent.toFixed(2)} (Score: {(results.metricScores?.vperSent || 0).toFixed(2)} = {results.metrics.vperSent.toFixed(2)} × 2.203 - 2.486)
+                  </span>
+                </h4>
+                <p className="text-sm text-gray-700">
+                  VperSent, which stands for "Verbs per Sentence", is an average rate of verbs included in each sentence. If this index is high, you can lower the text level by using simpler constructions (e.g., avoiding passive, gerund, and past participles).
+                </p>
+              </div>
+
+              <div>
+                <h4 className="font-semibold">
+                  POStypes
+                  <span className="font-normal text-sm text-gray-600 ml-2">
+                    = {results.metrics.posTypes.toFixed(2)} (Score: {(results.metricScores?.posTypes || 0).toFixed(2)} = {results.metrics.posTypes.toFixed(2)} × 1.768 - 12.006)
+                  </span>
+                </h4>
+                <p className="text-sm text-gray-700">
+                  POStypes measures the diversity of parts of speech in the text based on spaCy. A higher value indicates a more varied use of parts of speech, which may suggest a higher text level. If this index is high, you can lower the text level by using simpler and less varied parts of speech.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="font-semibold">
+                  LenNP
+                  <span className="font-normal text-sm text-gray-600 ml-2">
+                    = {results.metrics.lenNP.toFixed(2)} (Score: {(results.metricScores?.lenNP || 0).toFixed(2)} = {results.metrics.lenNP.toFixed(2)} × 2.629 - 6.697)
+                  </span>
+                </h4>
+                <p className="text-sm text-gray-700">
+                  LenNP represents the average length of noun phrases in the text per sentence. This value is calculated by performing a structural analysis using Python's spaCy (en_core_web_sm). A longer average length indicates more complex noun phrases, which may suggest a higher text level. If this index is high, you can lower the text level by using shorter and simpler noun phrases.
+                </p>
+              </div>
+            </div>
+          </div>
 
           <div className="mt-8 text-center">
             <button
