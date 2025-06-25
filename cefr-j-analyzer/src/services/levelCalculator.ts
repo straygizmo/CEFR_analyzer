@@ -1,7 +1,7 @@
 import type { ProcessedText, Token } from './textProcessor';
 import { extractNounPhrases, calculateARI } from './textProcessor';
-import { vocabularyIndex, getWordLevel as getWordLevelFromIndex } from '../data/vocabulary-index';
-import { cocaFrequency, getWordFrequency } from '../data/coca-frequency';
+import { getWordLevel as getWordLevelFromIndex } from '../data/vocabulary-index';
+import { cocaFrequency } from '../data/coca-frequency';
 
 export interface VocabularyMetrics {
   avrDiff: number;

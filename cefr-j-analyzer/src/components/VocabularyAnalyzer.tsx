@@ -10,7 +10,8 @@ const REFERENCE_VALUES = {
   A2: { avrDiff: 1.44, bperA: 0.12, cvv1: 2.95, avrFreqRank: 445.92, ari: 6.22, vperSent: 2.05, posTypes: 8.14, lenNP: 3.36 },
   B1: { avrDiff: 1.57, bperA: 0.18, cvv1: 3.90, avrFreqRank: 514.55, ari: 7.82, vperSent: 2.66, posTypes: 8.73, lenNP: 3.64 },
   B2: { avrDiff: 1.74, bperA: 0.26, cvv1: 4.67, avrFreqRank: 613.05, ari: 9.19, vperSent: 2.95, posTypes: 9.04, lenNP: 3.99 },
-  C1: { avrDiff: 1.91, bperA: 0.36, cvv1: 5.58, avrFreqRank: 739.30, ari: 10.79, vperSent: 3.28, posTypes: 9.36, lenNP: 4.51 }
+  C1: { avrDiff: 1.91, bperA: 0.36, cvv1: 5.58, avrFreqRank: 739.30, ari: 10.79, vperSent: 3.28, posTypes: 9.36, lenNP: 4.51 },
+  C2: { avrDiff: 2.08, bperA: 0.48, cvv1: 6.47, avrFreqRank: 865.50, ari: 12.40, vperSent: 3.61, posTypes: 9.68, lenNP: 5.03 }
 };
 
 export function VocabularyAnalyzer() {
@@ -37,7 +38,7 @@ export function VocabularyAnalyzer() {
       const processedText = processText(text);
       const analysisResults = analyzeVocabularyLevel(text, processedText);
       setResults(analysisResults);
-    } catch (err) {
+    } catch {
       setError('An error occurred during analysis. Please try again.');
     } finally {
       setIsAnalyzing(false);
