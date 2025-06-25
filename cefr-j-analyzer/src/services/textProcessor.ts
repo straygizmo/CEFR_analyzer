@@ -1,3 +1,5 @@
+import { getLemma } from '../data/lemmatization-map';
+
 // Simple POS tagging approximation without external libraries
 export interface Token {
   word: string;
@@ -69,24 +71,9 @@ export function simplePosTagger(word: string): string {
 }
 
 export function lemmatize(word: string, pos: string): string {
-  const lower = word.toLowerCase();
-  
-  // Simple lemmatization rules
-  if (pos === 'VERB') {
-    if (lower.endsWith('ing')) return lower.slice(0, -3);
-    if (lower.endsWith('ed')) return lower.slice(0, -2);
-    if (lower.endsWith('ies')) return lower.slice(0, -3) + 'y';
-    if (lower.endsWith('es')) return lower.slice(0, -2);
-    if (lower.endsWith('s')) return lower.slice(0, -1);
-  }
-  
-  if (pos === 'NOUN') {
-    if (lower.endsWith('ies')) return lower.slice(0, -3) + 'y';
-    if (lower.endsWith('es')) return lower.slice(0, -2);
-    if (lower.endsWith('s')) return lower.slice(0, -1);
-  }
-  
-  return lower;
+  // Use the lemmatization map which has comprehensive coverage
+  // pos parameter kept for API compatibility but not used with dictionary approach
+  return getLemma(word);
 }
 
 export function processText(text: string): ProcessedText {

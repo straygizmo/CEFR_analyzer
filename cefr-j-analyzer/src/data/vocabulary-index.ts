@@ -26758,9 +26758,24 @@ export const vocabularyIndex: { [key: string]: string[] } = {
   ]
 };
 
+// Import lemmatization function
+import { getLemma } from './lemmatization-map';
+
 // Add a function to get word level with proper handling
 export function getWordLevel(word: string): string {
-  const levels = vocabularyIndex[word.toLowerCase()];
+  const lower = word.toLowerCase();
+  
+  // First try direct lookup
+  let levels = vocabularyIndex[lower];
+  
+  // If not found, try lemmatized form
+  if (!levels || levels.length === 0) {
+    const lemma = getLemma(lower);
+    if (lemma !== lower) {
+      levels = vocabularyIndex[lemma];
+    }
+  }
+  
   if (!levels || levels.length === 0) return 'NA';
   
   // Return the lowest level (e.g., if word appears in both A1 and A2, return A1)

@@ -247,32 +247,46 @@ function createColoredText(text: string, processedText: ProcessedText): ColoredW
   const coloredWords: ColoredWord[] = [];
   const contentPOS = ['NOUN', 'VERB', 'ADJ', 'ADV'];
   
-  // Create a map of word positions
-  const words = text.split(/(\s+|[.,!?;:])/);
-  let tokenIndex = 0;
+  // Split text preserving whitespace and punctuation
+  const parts = text.split(/(\s+|[.,!?;:'"-])/);
   
-  for (const word of words) {
-    if (word.match(/^\s*$/) || word.match(/^[.,!?;:]$/)) {
+  // Create a map of tokens by their lowercase form for matching
+  const tokenMap = new Map<string, Token>();
+  for (const token of processedText.tokens) {
+    tokenMap.set(token.word, token);
+  }
+  
+  for (const part of parts) {
+    if (part.match(/^\s*$/) || part.match(/^[.,!?;:'"-]$/)) {
+      // Whitespace or punctuation
       coloredWords.push({
-        word,
+        word: part,
         level: 'NA',
         color: 'black',
         bold: false
       });
-    } else {
-      const token = processedText.tokens[tokenIndex];
+    } else if (part.length > 0) {
+      // Look up the token for this word
+      const token = tokenMap.get(part.toLowerCase());
       if (token) {
         const level = getWordLevel(token.lemma);
         const isContentWord = contentPOS.includes(token.pos);
         const { color, bold } = getWordColor(level, isContentWord);
         
         coloredWords.push({
-          word,
+          word: part, // Preserve original case
           level,
           color,
           bold
         });
-        tokenIndex++;
+      } else {
+        // Fallback for words not found in token map
+        coloredWords.push({
+          word: part,
+          level: 'NA',
+          color: 'black',
+          bold: false
+        });
       }
     }
   }
