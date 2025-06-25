@@ -1,4 +1,5 @@
 import { getLemma } from '../data/lemmatization-map';
+import { getWordPOS } from '../data/pos-index';
 
 // Simple POS tagging approximation without external libraries
 export interface Token {
@@ -22,11 +23,14 @@ export interface ProcessedText {
 
 // Common function words for basic POS tagging
 const DETERMINERS = new Set(['a', 'an', 'the', 'this', 'that', 'these', 'those', 'my', 'your', 'his', 'her', 'its', 'our', 'their']);
-const PREPOSITIONS = new Set(['in', 'on', 'at', 'by', 'for', 'with', 'about', 'against', 'between', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'to', 'from', 'up', 'down', 'under', 'over', 'near']);
+const PREPOSITIONS = new Set(['in', 'on', 'at', 'by', 'for', 'with', 'about', 'against', 'between', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'to', 'from', 'up', 'down', 'under', 'over', 'near', 'across']);
 const CONJUNCTIONS = new Set(['and', 'or', 'but', 'nor', 'so', 'yet', 'for', 'because', 'although', 'since', 'unless', 'while', 'if']);
 const PRONOUNS = new Set(['i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them', 'myself', 'yourself', 'himself', 'herself', 'itself', 'ourselves', 'themselves']);
 const AUXILIARIES = new Set(['am', 'is', 'are', 'was', 'were', 'been', 'being', 'be', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'shall', 'should', 'may', 'might', 'must', 'can', 'could']);
 const ADVERBS = new Set(['very', 'really', 'quite', 'just', 'almost', 'also', 'often', 'always', 'usually', 'sometimes', 'never', 'here', 'there', 'now', 'then', 'today', 'yesterday', 'tomorrow', 'soon', 'already', 'still']);
+
+// Common verb forms to help with detection when not in vocabulary
+const COMMON_VERBS = new Set(['go', 'goes', 'going', 'went', 'gone', 'make', 'makes', 'making', 'made', 'get', 'gets', 'getting', 'got', 'take', 'takes', 'taking', 'took', 'taken', 'come', 'comes', 'coming', 'came', 'see', 'sees', 'seeing', 'saw', 'seen', 'know', 'knows', 'knowing', 'knew', 'known', 'think', 'thinks', 'thinking', 'thought', 'give', 'gives', 'giving', 'gave', 'given', 'find', 'finds', 'finding', 'found', 'tell', 'tells', 'telling', 'told', 'become', 'becomes', 'becoming', 'became', 'leave', 'leaves', 'leaving', 'left', 'feel', 'feels', 'feeling', 'felt', 'bring', 'brings', 'bringing', 'brought', 'begin', 'begins', 'beginning', 'began', 'begun', 'keep', 'keeps', 'keeping', 'kept', 'hold', 'holds', 'holding', 'held', 'write', 'writes', 'writing', 'wrote', 'written', 'stand', 'stands', 'standing', 'stood', 'hear', 'hears', 'hearing', 'heard', 'let', 'lets', 'letting', 'mean', 'means', 'meaning', 'meant', 'set', 'sets', 'setting', 'meet', 'meets', 'meeting', 'met', 'run', 'runs', 'running', 'ran', 'pay', 'pays', 'paying', 'paid', 'sit', 'sits', 'sitting', 'sat', 'speak', 'speaks', 'speaking', 'spoke', 'spoken', 'serve', 'serves', 'serving', 'served', 'shape', 'shapes', 'shaping', 'shaped']);
 
 // Common verb endings for simple detection
 const VERB_ENDINGS = ['ing', 'ed', 's', 'es'];
@@ -53,7 +57,7 @@ export function splitSentences(text: string): string[] {
 export function simplePosTagger(word: string): string {
   const lower = word.toLowerCase();
   
-  // Check against word lists
+  // Check against word lists first
   if (DETERMINERS.has(lower)) return 'DET';
   if (PREPOSITIONS.has(lower)) return 'PREP';
   if (CONJUNCTIONS.has(lower)) return 'CONJ';
@@ -61,10 +65,46 @@ export function simplePosTagger(word: string): string {
   if (AUXILIARIES.has(lower)) return 'AUX';
   if (ADVERBS.has(lower)) return 'ADV';
   
-  // Check endings
+  // Check CEFR-J vocabulary POS data
+  let posFromVocab = getWordPOS(lower);
+  
+  // If not found, try removing common plural endings
+  if (posFromVocab.length === 0) {
+    if (lower.endsWith('s') && !lower.endsWith('ss')) {
+      // Try singular form
+      const singular = lower.slice(0, -1);
+      posFromVocab = getWordPOS(singular);
+    } else if (lower.endsWith('ies')) {
+      // Try converting -ies to -y (e.g., communities -> community)
+      const singular = lower.slice(0, -3) + 'y';
+      posFromVocab = getWordPOS(singular);
+    } else if (lower.endsWith('es') && (lower.endsWith('ches') || lower.endsWith('shes') || lower.endsWith('xes') || lower.endsWith('zes'))) {
+      // Try removing -es for words ending in ch, sh, x, z
+      const singular = lower.slice(0, -2);
+      posFromVocab = getWordPOS(singular);
+    }
+  }
+  
+  if (posFromVocab.length > 0) {
+    // Map CEFR-J POS tags to our simplified tags
+    if (posFromVocab.includes('verb')) return 'VERB';
+    if (posFromVocab.includes('noun')) return 'NOUN';
+    if (posFromVocab.includes('adjective')) return 'ADJ';
+    if (posFromVocab.includes('adverb')) return 'ADV';
+    if (posFromVocab.includes('preposition')) return 'PREP';
+    if (posFromVocab.includes('conjunction')) return 'CONJ';
+    if (posFromVocab.includes('determiner')) return 'DET';
+    if (posFromVocab.includes('pronoun')) return 'PRON';
+    // Use the first available POS if no match
+    return 'NOUN';
+  }
+  
+  // Check endings only as fallback
   if (ADVERB_ENDINGS.some(ending => lower.endsWith(ending))) return 'ADV';
-  if (VERB_ENDINGS.some(ending => lower.endsWith(ending))) return 'VERB';
   if (ADJECTIVE_ENDINGS.some(ending => lower.endsWith(ending))) return 'ADJ';
+  
+  // Check if it's a known common verb form
+  if (COMMON_VERBS.has(lower)) return 'VERB';
   
   // Default to noun (most common content word)
   return 'NOUN';

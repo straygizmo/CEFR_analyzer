@@ -14,6 +14,14 @@ export interface VocabularyMetrics {
   lenNP: number;
 }
 
+export interface LevelStatistics {
+  count: number;
+  avrIdx: number;
+  verb: number;
+  noun: number;
+  adjective: number;
+}
+
 export interface VocabularyLevel {
   level: string;
   score: number;
@@ -21,6 +29,11 @@ export interface VocabularyLevel {
   wordDistribution: { [level: string]: number };
   coloredText: ColoredWord[];
   metricScores: { [metric: string]: number };
+  levelStatistics: { [level: string]: LevelStatistics };
+  totalContentWords: number;
+  uniqueVerbs: number;
+  totalVerbs: number;
+  sentenceCount: number;
 }
 
 export interface ColoredWord {
@@ -320,11 +333,75 @@ function calculateWordDistribution(tokens: Token[]): { [level: string]: number }
   return distribution;
 }
 
+function calculateVerbStatistics(tokens: Token[]): { uniqueVerbs: number, totalVerbs: number } {
+  const verbTypes = new Set<string>();
+  let verbTokens = 0;
+  
+  for (const token of tokens) {
+    if (token.pos === 'VERB' && token.lemma.toLowerCase() !== 'be') {
+      verbTypes.add(token.lemma.toLowerCase());
+      verbTokens++;
+    }
+  }
+  
+  return { uniqueVerbs: verbTypes.size, totalVerbs: verbTokens };
+}
+
+function calculateLevelStatistics(tokens: Token[]): { stats: { [level: string]: LevelStatistics }, total: number } {
+  const levelStats: { [level: string]: LevelStatistics } = {
+    'A1': { count: 0, avrIdx: 0, verb: 0, noun: 0, adjective: 0 },
+    'A2': { count: 0, avrIdx: 0, verb: 0, noun: 0, adjective: 0 },
+    'B1': { count: 0, avrIdx: 0, verb: 0, noun: 0, adjective: 0 },
+    'B2': { count: 0, avrIdx: 0, verb: 0, noun: 0, adjective: 0 },
+    'C1': { count: 0, avrIdx: 0, verb: 0, noun: 0, adjective: 0 },
+    'C2': { count: 0, avrIdx: 0, verb: 0, noun: 0, adjective: 0 }
+  };
+  
+  const contentPOS = ['NOUN', 'VERB', 'ADJ', 'ADV'];
+  const levelValues: { [key: string]: number } = {
+    'A1': 1, 'A2': 2, 'B1': 3, 'B2': 4, 'C1': 5, 'C2': 6
+  };
+  
+  let totalContentWords = 0;
+  
+  // Count words by level and POS
+  for (const token of tokens) {
+    if (contentPOS.includes(token.pos)) {
+      const level = getWordLevel(token.lemma);
+      if (level !== 'NA' && levelStats[level]) {
+        levelStats[level].count++;
+        
+        // Count by POS
+        if (token.pos === 'VERB') {
+          levelStats[level].verb++;
+        } else if (token.pos === 'NOUN') {
+          levelStats[level].noun++;
+        } else if (token.pos === 'ADJ') {
+          levelStats[level].adjective++;
+        }
+        
+        totalContentWords++;
+      }
+    }
+  }
+  
+  // Calculate avrIdx for each level
+  for (const level in levelStats) {
+    if (levelStats[level].count > 0) {
+      levelStats[level].avrIdx = levelStats[level].count * levelValues[level];
+    }
+  }
+  
+  return { stats: levelStats, total: totalContentWords };
+}
+
 export function analyzeVocabularyLevel(text: string, processedText: ProcessedText): VocabularyLevel {
   const metrics = calculateMetrics(text, processedText);
   const metricScores = calculateMetricScores(metrics);
   const finalScore = calculateFinalScore(metricScores);
   const level = scoreToLevel(finalScore);
+  const { stats, total } = calculateLevelStatistics(processedText.tokens);
+  const { uniqueVerbs, totalVerbs } = calculateVerbStatistics(processedText.tokens);
   
   return {
     level,
@@ -332,6 +409,11 @@ export function analyzeVocabularyLevel(text: string, processedText: ProcessedTex
     metrics,
     metricScores,
     wordDistribution: calculateWordDistribution(processedText.tokens),
-    coloredText: createColoredText(text, processedText)
+    coloredText: createColoredText(text, processedText),
+    levelStatistics: stats,
+    totalContentWords: total,
+    uniqueVerbs,
+    totalVerbs,
+    sentenceCount: processedText.sentenceCount
   };
 }
