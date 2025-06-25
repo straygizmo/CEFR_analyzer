@@ -1,69 +1,121 @@
-# React + TypeScript + Vite
+# CEFR-J Level Analyzer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A comprehensive web application for analyzing English text proficiency based on CEFR-J standards. This tool combines vocabulary complexity analysis with writing quality assessment to provide detailed feedback for language learners and educators.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 📊 Vocabulary Level Analyzer
+- Analyzes text vocabulary complexity using the official CEFR-J Wordlist
+- Supports 10-1000 word texts
+- Provides 8 linguistic metrics for comprehensive assessment
+- Color-coded word visualization by CEFR-J level
+- Detailed score breakdown and level estimation
 
-## Expanding the ESLint configuration
+### ✍️ Writing Level Analyzer
+- Assesses writing proficiency for texts of 10-500 words
+- Two modes: Quick Check and Full Assessment
+- AI-powered analysis for writing quality metrics
+- Sentence-by-sentence corrections with explanations
+- Support for English and Japanese feedback
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 🔄 Combined Analysis
+- Holistic assessment combining vocabulary and writing analysis
+- Comprehensive CEFR-J level determination
+- Detailed recommendations for improvement
+- Visual representation of all metrics
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Technology Stack
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+- **Frontend**: React 19 with TypeScript
+- **Routing**: React Router v7
+- **Styling**: Tailwind CSS
+- **Build Tool**: Vite
+- **Deployment**: Cloudflare Workers
+- **Data Processing**: Custom tokenization and POS tagging
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Getting Started
+
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
+
+### Installation
+
+1. Clone the repository
+```bash
+git clone https://github.com/your-username/cefr-j-analyzer.git
+cd cefr-j-analyzer
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+2. Install dependencies
+```bash
+npm install
 ```
+
+3. Convert data files
+```bash
+npm run convert-data
+```
+
+4. Run development server
+```bash
+npm run dev
+```
+
+### Deployment
+
+1. Configure your Cloudflare account in `wrangler.toml`
+2. Add your Gemini API key as a secret:
+```bash
+wrangler secret put GEMINI_API_KEY
+```
+3. Deploy to Cloudflare Workers:
+```bash
+npm run build
+wrangler deploy
+```
+
+## Usage
+
+1. Navigate to the home page
+2. Choose your analysis type:
+   - **Vocabulary Analyzer**: For vocabulary complexity assessment
+   - **Writing Analyzer**: For writing quality evaluation
+   - **Combined Analysis**: For comprehensive text analysis
+3. Enter or paste your text (10-1000 words for vocabulary, 10-500 for writing)
+4. Click "Analyze" and wait for results
+5. Review the detailed feedback and recommendations
+
+## CEFR-J Levels
+
+CEFR-J extends the Common European Framework with more granular levels for Japanese learners:
+- **Pre-A1**: Beginner
+- **A1.1, A1.2, A1.3**: Elementary
+- **A2.1, A2.2**: Pre-intermediate
+- **B1.1, B1.2**: Intermediate
+- **B2.1, B2.2**: Upper-intermediate
+- **C1, C2**: Advanced
+
+## Credits
+
+『CEFR-J Wordlist Version 1.6』 東京外国語大学投野由紀夫研究室. （URL: http://www.cefr-j.org/download.html より 2022 年 2 月ダウンロード）
+
+『DiQt English-Japanese Dictionary』BooQs Inc.
+
+## Citation
+
+When using this tool for research, please cite:
+
+Uchida, S. and Negishi, M. (2025). Assigning CEFR-J levels to English learners' writing: An approach using lexical metrics and generative AI. *Research Methods in Applied Linguistics, 4*(2), 100199. https://doi.org/10.1016/j.rmal.2025.100199
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Support
+
+For issues, questions, or suggestions, please open an issue on GitHub or contact: kyudai.uchida.lab[at]gmail.com

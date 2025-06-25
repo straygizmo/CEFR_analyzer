@@ -1,0 +1,21 @@
+name = "cefr-j-analyzer"
+main = "functions/[[path]].ts"
+compatibility_date = "2024-12-01"
+
+[build]
+command = "npm run build"
+
+[site]
+bucket = "./dist"
+
+[env.production]
+route = "cefr-j-analyzer.com/*"
+
+[[kv_namespaces]]
+binding = "CACHE"
+id = "your-kv-namespace-id"
+preview_id = "your-kv-namespace-preview-id"
+
+[vars]
+# Add your Gemini API key here or use wrangler secret
+# GEMINI_API_KEY = "your-gemini-api-key"
