@@ -1,14 +1,7 @@
 import type { ProcessedText, Token } from './textProcessor';
-import { countContentWords, extractNounPhrases, getUniquePOSCount, calculateARI } from './textProcessor';
-import vocabularyIndex from '../data/vocabulary-index.json';
-
-// Word frequency data (simplified - in production, load from external source)
-const WORD_FREQUENCIES: { [word: string]: number } = {
-  'the': 1, 'be': 2, 'to': 3, 'of': 4, 'and': 5, 'a': 6, 'in': 7, 'that': 8,
-  'have': 9, 'i': 10, 'it': 11, 'for': 12, 'not': 13, 'on': 14, 'with': 15,
-  'he': 16, 'as': 17, 'you': 18, 'do': 19, 'at': 20
-  // Add more as needed
-};
+import { extractNounPhrases, calculateARI } from './textProcessor';
+import { vocabularyIndex, getWordLevel as getWordLevelFromIndex } from '../data/vocabulary-index';
+import { cocaFrequency, getWordFrequency } from '../data/coca-frequency';
 
 export interface VocabularyMetrics {
   avrDiff: number;
@@ -27,6 +20,7 @@ export interface VocabularyLevel {
   metrics: VocabularyMetrics;
   wordDistribution: { [level: string]: number };
   coloredText: ColoredWord[];
+  metricScores: { [metric: string]: number };
 }
 
 export interface ColoredWord {
@@ -36,24 +30,9 @@ export interface ColoredWord {
   bold: boolean;
 }
 
-// Reference values for each CEFR level
-const REFERENCE_VALUES = {
-  A1: { avrDiff: 1.28, bperA: 0.06, cvv1: 1.93, avrFreqRank: 367.99, ari: 4.10, vperSent: 1.51, posTypes: 7.16, lenNP: 2.94 },
-  A2: { avrDiff: 1.44, bperA: 0.12, cvv1: 2.95, avrFreqRank: 445.92, ari: 6.22, vperSent: 2.05, posTypes: 8.14, lenNP: 3.36 },
-  B1: { avrDiff: 1.57, bperA: 0.18, cvv1: 3.90, avrFreqRank: 514.55, ari: 7.82, vperSent: 2.66, posTypes: 8.73, lenNP: 3.64 },
-  B2: { avrDiff: 1.74, bperA: 0.26, cvv1: 4.67, avrFreqRank: 613.05, ari: 9.19, vperSent: 2.95, posTypes: 9.04, lenNP: 3.99 },
-  C1: { avrDiff: 1.91, bperA: 0.36, cvv1: 5.58, avrFreqRank: 739.30, ari: 10.79, vperSent: 3.28, posTypes: 9.36, lenNP: 4.51 }
-};
 
 function getWordLevel(word: string): string {
-  const levels = (vocabularyIndex as any)[word.toLowerCase()];
-  if (!levels || levels.length === 0) return 'NA';
-  // Return the lowest level (e.g., if word appears in both A1 and A2, return A1)
-  const levelOrder = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
-  for (const level of levelOrder) {
-    if (levels.includes(level)) return level;
-  }
-  return levels[0];
+  return getWordLevelFromIndex(word);
 }
 
 function getWordColor(level: string, isContentWord: boolean): { color: string; bold: boolean } {
@@ -109,30 +88,47 @@ function calculateBperA(tokens: Token[]): number {
 }
 
 function calculateCVV1(tokens: Token[]): number {
-  const verbs = new Set<string>();
-  let totalVerbs = 0;
+  // CVV1: number of verb types divided by the square root of twice the number of verb tokens
+  // Excluding be-verbs as per the paper
+  const verbTypes = new Set<string>();
+  let verbTokens = 0;
   
   for (const token of tokens) {
-    if (token.pos === 'VERB') {
-      verbs.add(token.lemma);
-      totalVerbs++;
+    if (token.pos === 'VERB' && token.lemma.toLowerCase() !== 'be') {
+      verbTypes.add(token.lemma.toLowerCase());
+      verbTokens++;
     }
   }
   
-  if (totalVerbs === 0) return 0;
-  return verbs.size / Math.sqrt(totalVerbs * 2);
+  if (verbTokens === 0) return 0;
+  return verbTypes.size / Math.sqrt(2 * verbTokens);
+}
+
+function getWordFrequencyRank(word: string): number {
+  const rank = cocaFrequency[word.toLowerCase()];
+  if (typeof rank === 'number') return rank;
+  
+  // If not found in COCA, return 10000 (as per paper: items ranked above 10,000 calculated as 10,000)
+  return 10000;
 }
 
 function calculateAvrFreqRank(tokens: Token[]): number {
   const ranks: number[] = [];
   
   for (const token of tokens) {
-    const rank = WORD_FREQUENCIES[token.lemma] || 1000; // Default high rank for unknown
-    ranks.push(rank);
+    // Include all words, not just content words (as per paper)
+    if (token.pos !== 'PUNCT' && token.pos !== 'SPACE') {
+      const rank = getWordFrequencyRank(token.lemma);
+      ranks.push(Math.min(rank, 10000)); // Cap at 10000 as per paper
+    }
   }
   
-  // Sort and exclude 3 least frequent (highest rank numbers)
+  if (ranks.length === 0) return 500;
+  
+  // Sort ranks from lowest (most frequent) to highest (least frequent)
   ranks.sort((a, b) => a - b);
+  
+  // Exclude the three most infrequent words (highest rank numbers)
   if (ranks.length > 3) {
     ranks.splice(-3, 3);
   }
@@ -148,19 +144,45 @@ function calculateVperSent(processedText: ProcessedText): number {
   return totalVerbs / processedText.sentenceCount;
 }
 
+function calculatePOStypes(processedText: ProcessedText): number {
+  // Average number of distinct POS tags per sentence
+  if (processedText.sentenceCount === 0) return 0;
+  
+  let totalPOSTypes = 0;
+  
+  for (const sentence of processedText.sentences) {
+    const posInSentence = new Set<string>();
+    for (const token of sentence.tokens) {
+      if (token.pos !== 'PUNCT' && token.pos !== 'SPACE') {
+        posInSentence.add(token.pos);
+      }
+    }
+    totalPOSTypes += posInSentence.size;
+  }
+  
+  return totalPOSTypes / processedText.sentenceCount;
+}
+
 function calculateLenNP(processedText: ProcessedText): number {
+  // Average length of noun phrases per sentence
   let totalNPLength = 0;
-  let npCount = 0;
+  let sentenceCount = 0;
   
   for (const sentence of processedText.sentences) {
     const nounPhrases = extractNounPhrases(sentence);
+    let sentenceNPLength = 0;
+    
     for (const np of nounPhrases) {
-      totalNPLength += np.length;
-      npCount++;
+      sentenceNPLength += np.length;
+    }
+    
+    if (nounPhrases.length > 0) {
+      totalNPLength += sentenceNPLength / nounPhrases.length;
+      sentenceCount++;
     }
   }
   
-  return npCount > 0 ? totalNPLength / processedText.sentenceCount : 0;
+  return sentenceCount > 0 ? totalNPLength / sentenceCount : 0;
 }
 
 function calculateMetrics(text: string, processedText: ProcessedText): VocabularyMetrics {
@@ -171,69 +193,54 @@ function calculateMetrics(text: string, processedText: ProcessedText): Vocabular
     avrFreqRank: calculateAvrFreqRank(processedText.tokens),
     ari: calculateARI(text),
     vperSent: calculateVperSent(processedText),
-    posTypes: getUniquePOSCount(processedText.tokens),
+    posTypes: calculatePOStypes(processedText),
     lenNP: calculateLenNP(processedText)
   };
 }
 
-function normalizeScore(value: number, min: number, max: number): number {
-  // Normalize to 0-7 scale
-  const normalized = ((value - min) / (max - min)) * 7;
-  return Math.max(0, Math.min(7, normalized));
-}
-
-function calculateLevelScores(metrics: VocabularyMetrics): { [metric: string]: number } {
-  // Define min/max ranges for normalization (based on reference values)
-  const ranges = {
-    avrDiff: { min: 1.0, max: 2.2 },
-    bperA: { min: 0, max: 0.5 },
-    cvv1: { min: 1.5, max: 6.0 },
-    avrFreqRank: { min: 300, max: 800 },
-    ari: { min: 3, max: 12 },
-    vperSent: { min: 1, max: 4 }
-  };
-  
+// Regression equations from the paper
+function calculateMetricScores(metrics: VocabularyMetrics): { [metric: string]: number } {
   return {
-    avrDiff: normalizeScore(metrics.avrDiff, ranges.avrDiff.min, ranges.avrDiff.max),
-    bperA: normalizeScore(metrics.bperA, ranges.bperA.min, ranges.bperA.max),
-    cvv1: normalizeScore(metrics.cvv1, ranges.cvv1.min, ranges.cvv1.max),
-    avrFreqRank: normalizeScore(metrics.avrFreqRank, ranges.avrFreqRank.min, ranges.avrFreqRank.max),
-    ari: normalizeScore(metrics.ari, ranges.ari.min, ranges.ari.max),
-    vperSent: normalizeScore(metrics.vperSent, ranges.vperSent.min, ranges.vperSent.max)
+    cvv1: Math.min(metrics.cvv1 * 1.1059 - 1.208, 7),
+    bperA: Math.min(metrics.bperA * 13.146 + 0.428, 7),
+    posTypes: Math.min(metrics.posTypes * 1.768 - 12.006, 7),
+    ari: Math.min(metrics.ari * 0.607 - 1.632, 7),
+    avrDiff: Math.min(metrics.avrDiff * 6.417 - 7.184, 7),
+    avrFreqRank: Math.min(metrics.avrFreqRank * 0.004 - 0.608, 7),
+    vperSent: Math.min(metrics.vperSent * 2.203 - 2.486, 7),
+    lenNP: Math.min(metrics.lenNP * 2.629 - 6.697, 7)
   };
 }
 
-function determineLevel(metrics: VocabularyMetrics): string {
-  // Calculate distances to each reference level
-  const distances: { [level: string]: number } = {};
+function calculateFinalScore(metricScores: { [metric: string]: number }): number {
+  // Convert to array and sort
+  const scores = Object.values(metricScores).sort((a, b) => a - b);
   
-  for (const [level, refValues] of Object.entries(REFERENCE_VALUES)) {
-    let distance = 0;
-    distance += Math.pow(metrics.avrDiff - refValues.avrDiff, 2);
-    distance += Math.pow(metrics.bperA - refValues.bperA, 2);
-    distance += Math.pow(metrics.cvv1 - refValues.cvv1, 2);
-    distance += Math.pow(metrics.avrFreqRank - refValues.avrFreqRank, 2) / 10000; // Scale down
-    distance += Math.pow(metrics.ari - refValues.ari, 2);
-    distance += Math.pow(metrics.vperSent - refValues.vperSent, 2);
-    
-    distances[level] = Math.sqrt(distance);
+  // Exclude min and max values
+  if (scores.length > 2) {
+    scores.shift(); // Remove minimum
+    scores.pop();   // Remove maximum
   }
   
-  // Find the closest level
-  let minDistance = Infinity;
-  let closestLevel = 'B1';
-  
-  for (const [level, distance] of Object.entries(distances)) {
-    if (distance < minDistance) {
-      minDistance = distance;
-      closestLevel = level;
-    }
-  }
-  
-  // Add sub-level based on metrics
-  const subLevel = metrics.avrDiff < REFERENCE_VALUES[closestLevel as keyof typeof REFERENCE_VALUES].avrDiff ? '.1' : '.2';
-  
-  return closestLevel + subLevel;
+  // Calculate average of remaining values
+  const sum = scores.reduce((acc, score) => acc + score, 0);
+  return scores.length > 0 ? sum / scores.length : 0;
+}
+
+function scoreToLevel(score: number): string {
+  // Mapping from Table 2
+  if (score < 0.5) return 'preA1';
+  if (score < 0.84) return 'A1.1';
+  if (score < 1.17) return 'A1.2';
+  if (score < 1.5) return 'A1.3';
+  if (score < 2) return 'A2.1';
+  if (score < 2.5) return 'A2.2';
+  if (score < 3) return 'B1.1';
+  if (score < 3.5) return 'B1.2';
+  if (score < 4) return 'B2.1';
+  if (score < 4.5) return 'B2.2';
+  if (score < 5.5) return 'C1';
+  return 'C2';
 }
 
 function createColoredText(text: string, processedText: ProcessedText): ColoredWord[] {
@@ -279,11 +286,20 @@ function calculateWordDistribution(tokens: Token[]): { [level: string]: number }
   };
   
   const contentPOS = ['NOUN', 'VERB', 'ADJ', 'ADV'];
+  let totalContentWords = 0;
   
   for (const token of tokens) {
     if (contentPOS.includes(token.pos)) {
       const level = getWordLevel(token.lemma);
       distribution[level] = (distribution[level] || 0) + 1;
+      totalContentWords++;
+    }
+  }
+  
+  // Convert to percentages
+  if (totalContentWords > 0) {
+    for (const level in distribution) {
+      distribution[level] = (distribution[level] / totalContentWords) * 100;
     }
   }
   
@@ -292,14 +308,15 @@ function calculateWordDistribution(tokens: Token[]): { [level: string]: number }
 
 export function analyzeVocabularyLevel(text: string, processedText: ProcessedText): VocabularyLevel {
   const metrics = calculateMetrics(text, processedText);
-  const level = determineLevel(metrics);
-  const scores = calculateLevelScores(metrics);
-  const overallScore = Object.values(scores).reduce((sum, score) => sum + score, 0) / 6;
+  const metricScores = calculateMetricScores(metrics);
+  const finalScore = calculateFinalScore(metricScores);
+  const level = scoreToLevel(finalScore);
   
   return {
     level,
-    score: overallScore,
+    score: finalScore,
     metrics,
+    metricScores,
     wordDistribution: calculateWordDistribution(processedText.tokens),
     coloredText: createColoredText(text, processedText)
   };

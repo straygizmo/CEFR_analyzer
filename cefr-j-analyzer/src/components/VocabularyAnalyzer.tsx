@@ -58,23 +58,6 @@ export function VocabularyAnalyzer() {
 
   const getScorePercentage = (score: number) => (score / 7) * 100;
 
-  const getMetricScore = (metric: keyof VocabularyMetrics, value: number): number => {
-    const ranges = {
-      avrDiff: { min: 1.0, max: 2.2 },
-      bperA: { min: 0, max: 0.5 },
-      cvv1: { min: 1.5, max: 6.0 },
-      avrFreqRank: { min: 300, max: 800 },
-      ari: { min: 3, max: 12 },
-      vperSent: { min: 1, max: 4 },
-      posTypes: { min: 6, max: 10 },
-      lenNP: { min: 2, max: 5 }
-    };
-    
-    const range = ranges[metric];
-    const normalized = ((value - range.min) / (range.max - range.min)) * 7;
-    return Math.max(0, Math.min(7, normalized));
-  };
-
   const getSubLevel = (metric: keyof VocabularyMetrics, value: number): string => {
     let closestLevel = 'A1';
     let minDiff = Infinity;
@@ -229,70 +212,90 @@ export function VocabularyAnalyzer() {
                     <div className="h-20 bg-gray-200 relative">
                       <div 
                         className="absolute bottom-0 left-0 right-0 bg-blue-500"
-                        style={{ height: `${getScorePercentage(getMetricScore('avrDiff', results.metrics.avrDiff))}%` }}
+                        style={{ height: `${getScorePercentage(results.metricScores?.avrDiff || 0)}%` }}
                       />
                     </div>
                     <div className="text-center mt-1">
-                      {getMetricScore('avrDiff', results.metrics.avrDiff).toFixed(2)}
+                      {(results.metricScores?.avrDiff || 0).toFixed(2)}
                     </div>
                   </td>
                   <td className="border border-gray-300 px-4 py-2">
                     <div className="h-20 bg-gray-200 relative">
                       <div 
                         className="absolute bottom-0 left-0 right-0 bg-blue-500"
-                        style={{ height: `${getScorePercentage(getMetricScore('bperA', results.metrics.bperA))}%` }}
+                        style={{ height: `${getScorePercentage(results.metricScores?.bperA || 0)}%` }}
                       />
                     </div>
                     <div className="text-center mt-1">
-                      {getMetricScore('bperA', results.metrics.bperA).toFixed(2)}
+                      {(results.metricScores?.bperA || 0).toFixed(2)}
                     </div>
                   </td>
                   <td className="border border-gray-300 px-4 py-2">
                     <div className="h-20 bg-gray-200 relative">
                       <div 
                         className="absolute bottom-0 left-0 right-0 bg-blue-500"
-                        style={{ height: `${getScorePercentage(getMetricScore('cvv1', results.metrics.cvv1))}%` }}
+                        style={{ height: `${getScorePercentage(results.metricScores?.cvv1 || 0)}%` }}
                       />
                     </div>
                     <div className="text-center mt-1">
-                      {getMetricScore('cvv1', results.metrics.cvv1).toFixed(2)}
+                      {(results.metricScores?.cvv1 || 0).toFixed(2)}
                     </div>
                   </td>
                   <td className="border border-gray-300 px-4 py-2">
                     <div className="h-20 bg-gray-200 relative">
                       <div 
                         className="absolute bottom-0 left-0 right-0 bg-blue-500"
-                        style={{ height: `${getScorePercentage(getMetricScore('avrFreqRank', results.metrics.avrFreqRank))}%` }}
+                        style={{ height: `${getScorePercentage(results.metricScores?.avrFreqRank || 0)}%` }}
                       />
                     </div>
                     <div className="text-center mt-1">
-                      {getMetricScore('avrFreqRank', results.metrics.avrFreqRank).toFixed(2)}
+                      {(results.metricScores?.avrFreqRank || 0).toFixed(2)}
                     </div>
                   </td>
                   <td className="border border-gray-300 px-4 py-2">
                     <div className="h-20 bg-gray-200 relative">
                       <div 
                         className="absolute bottom-0 left-0 right-0 bg-blue-500"
-                        style={{ height: `${getScorePercentage(getMetricScore('ari', results.metrics.ari))}%` }}
+                        style={{ height: `${getScorePercentage(results.metricScores?.ari || 0)}%` }}
                       />
                     </div>
                     <div className="text-center mt-1">
-                      {getMetricScore('ari', results.metrics.ari).toFixed(2)}
+                      {(results.metricScores?.ari || 0).toFixed(2)}
                     </div>
                   </td>
                   <td className="border border-gray-300 px-4 py-2">
                     <div className="h-20 bg-gray-200 relative">
                       <div 
                         className="absolute bottom-0 left-0 right-0 bg-blue-500"
-                        style={{ height: `${getScorePercentage(getMetricScore('vperSent', results.metrics.vperSent))}%` }}
+                        style={{ height: `${getScorePercentage(results.metricScores?.vperSent || 0)}%` }}
                       />
                     </div>
                     <div className="text-center mt-1">
-                      {getMetricScore('vperSent', results.metrics.vperSent).toFixed(2)}
+                      {(results.metricScores?.vperSent || 0).toFixed(2)}
                     </div>
                   </td>
-                  <td className="border border-gray-300 px-4 py-2">-</td>
-                  <td className="border border-gray-300 px-4 py-2">-</td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    <div className="h-20 bg-gray-200 relative">
+                      <div 
+                        className="absolute bottom-0 left-0 right-0 bg-blue-500"
+                        style={{ height: `${getScorePercentage(results.metricScores?.posTypes || 0)}%` }}
+                      />
+                    </div>
+                    <div className="text-center mt-1">
+                      {(results.metricScores?.posTypes || 0).toFixed(2)}
+                    </div>
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    <div className="h-20 bg-gray-200 relative">
+                      <div 
+                        className="absolute bottom-0 left-0 right-0 bg-blue-500"
+                        style={{ height: `${getScorePercentage(results.metricScores?.lenNP || 0)}%` }}
+                      />
+                    </div>
+                    <div className="text-center mt-1">
+                      {(results.metricScores?.lenNP || 0).toFixed(2)}
+                    </div>
+                  </td>
                 </tr>
                 <tr>
                   <th className="border border-gray-300 px-4 py-2">Sub-level</th>
@@ -302,8 +305,8 @@ export function VocabularyAnalyzer() {
                   <td className="border border-gray-300 px-4 py-2">{getSubLevel('avrFreqRank', results.metrics.avrFreqRank)}</td>
                   <td className="border border-gray-300 px-4 py-2">{getSubLevel('ari', results.metrics.ari)}</td>
                   <td className="border border-gray-300 px-4 py-2 bg-gray-200">{getSubLevel('vperSent', results.metrics.vperSent)}</td>
-                  <td className="border border-gray-300 px-4 py-2">-</td>
-                  <td className="border border-gray-300 px-4 py-2">-</td>
+                  <td className="border border-gray-300 px-4 py-2">{getSubLevel('posTypes', results.metrics.posTypes)}</td>
+                  <td className="border border-gray-300 px-4 py-2">{getSubLevel('lenNP', results.metrics.lenNP)}</td>
                 </tr>
               </tbody>
             </table>
