@@ -21,9 +21,9 @@ export function analyzeVerbsPerSentence(processedText: ProcessedText): VerbAnaly
   processedText.sentences.forEach((sentence, index) => {
     const verbs: string[] = [];
     
-    // Count both VERB and AUX tags as verbs
+    // Count verbs using Penn Treebank tags (VB*, MD) for consistency with calculateVperSent
     sentence.tokens.forEach(token => {
-      if (token.pos === 'VERB' || token.pos === 'AUX') {
+      if (token.pos?.startsWith('VB') || token.pos === 'MD') {
         verbs.push(`${token.word} (${token.lemma})`);
       }
     });

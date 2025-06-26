@@ -258,7 +258,7 @@ function mapWinkPosToSimple(winkPos: string): string {
     'NOUN': 'NN',
     'PROPN': 'NNP',  // Proper noun
     'VERB': 'VB',
-    'AUX': 'VB',     // Auxiliary verbs
+    'AUX': 'VB',     // Auxiliary verbs (mapped to VB for consistency)
     'ADJ': 'JJ',
     'ADV': 'RB',
     'PRON': 'PRP',
