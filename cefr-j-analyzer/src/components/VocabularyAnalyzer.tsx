@@ -650,10 +650,10 @@ export function VocabularyAnalyzer() {
               <p>AvrDiff_CEFR = min(AvrDiff × 6.417 - 7.184, 7)</p>
               <p>BperA_CEFR = min(BperA × 13.146 + 0.428, 7)</p>
               <p>CVV1_CEFR = min(CVV1 × 1.1059 - 1.208, 7)</p>
-              <p>POStypes_CEFR = min(POStypes × 1.768 - 12.006, 7)</p>
-              <p>ARI_CEFR = min(ARI × 0.607 - 1.632, 7)</p>
               <p>AvrFreqRank_CEFR = min(AvrFreqRank × 0.004 - 0.608, 7)</p>
+              <p>ARI_CEFR = min(ARI × 0.607 - 1.632, 7)</p>
               <p>VperSent_CEFR = min(VperSent × 2.203 - 2.486, 7)</p>
+              <p>POStypes_CEFR = min(POStypes × 1.768 - 12.006, 7)</p>
               <p>LenNP_CEFR = min(LenNP × 2.629 - 6.697, 7)</p>
             </div>
 
@@ -663,9 +663,8 @@ export function VocabularyAnalyzer() {
                 <h4 className="font-semibold">
                   AvrDiff
                   <span className="font-normal text-sm text-gray-600 ml-2">
-                    = {results.metrics.avrDiff.toFixed(2)} (Score:{" "}
-                    {(results.metricScores?.avrDiff || 0).toFixed(2)} ={" "}
-                    {results.metrics.avrDiff.toFixed(2)} × 6.417 - 7.184)
+                    = min(<b>{results.metrics.avrDiff.toFixed(2)}</b> × 6.417 - 7.184, 7), Score:{" "}
+                    {(results.metricScores?.avrDiff || 0).toFixed(2)}
                   </span>
                 </h4>
                 <p className="text-sm text-gray-700">
@@ -683,9 +682,8 @@ export function VocabularyAnalyzer() {
                 <h4 className="font-semibold">
                   BperA
                   <span className="font-normal text-sm text-gray-600 ml-2">
-                    = {results.metrics.bperA.toFixed(2)} (Score:{" "}
-                    {(results.metricScores?.bperA || 0).toFixed(2)} ={" "}
-                    {results.metrics.bperA.toFixed(2)} × 13.146 + 0.428)
+                    = min(<b>{results.metrics.bperA.toFixed(2)}</b> × 13.146 + 0.428, 7), Score:{" "}
+                    {(results.metricScores?.bperA || 0).toFixed(2)}
                   </span>
                 </h4>
                 <p className="text-sm text-gray-700">
@@ -706,9 +704,8 @@ export function VocabularyAnalyzer() {
                 <h4 className="font-semibold">
                   CVV1
                   <span className="font-normal text-sm text-gray-600 ml-2">
-                    = {results.metrics.cvv1.toFixed(2)} (Score:{" "}
-                    {(results.metricScores?.cvv1 || 0).toFixed(2)} ={" "}
-                    {results.metrics.cvv1.toFixed(2)} × 1.1059 - 1.208)
+                    = min(<b>{results.metrics.cvv1.toFixed(2)}</b> × 1.1059 - 1.208, 7), Score:{" "}
+                    {(results.metricScores?.cvv1 || 0).toFixed(2)}
                   </span>
                 </h4>
                 <p className="text-sm text-gray-700">
@@ -727,9 +724,8 @@ export function VocabularyAnalyzer() {
                 <h4 className="font-semibold">
                   AvrFreqRank
                   <span className="font-normal text-sm text-gray-600 ml-2">
-                    = {results.metrics.avrFreqRank.toFixed(2)} (Score:{" "}
-                    {(results.metricScores?.avrFreqRank || 0).toFixed(2)} ={" "}
-                    {results.metrics.avrFreqRank.toFixed(2)} × 0.004 - 0.608)
+                    = min(<b>{results.metrics.avrFreqRank.toFixed(2)}</b> × 0.004 - 0.608, 7), Score:{" "}
+                    {(results.metricScores?.avrFreqRank || 0).toFixed(2)}
                   </span>
                 </h4>
                 <p className="text-sm text-gray-700">
@@ -746,9 +742,8 @@ export function VocabularyAnalyzer() {
                 <h4 className="font-semibold">
                   ARI
                   <span className="font-normal text-sm text-gray-600 ml-2">
-                    = {results.metrics.ari.toFixed(2)} (Score:{" "}
-                    {(results.metricScores?.ari || 0).toFixed(2)} ={" "}
-                    {results.metrics.ari.toFixed(2)} × 0.607 - 1.632)
+                    = min(<b>{results.metrics.ari.toFixed(2)}</b> × 0.607 - 1.632, 7), Score:{" "}
+                    {(results.metricScores?.ari || 0).toFixed(2)}
                   </span>
                 </h4>
                 <p className="text-sm text-gray-700">
@@ -767,9 +762,8 @@ export function VocabularyAnalyzer() {
                 <h4 className="font-semibold">
                   VperSent
                   <span className="font-normal text-sm text-gray-600 ml-2">
-                    = {results.metrics.vperSent.toFixed(2)} (Score:{" "}
-                    {(results.metricScores?.vperSent || 0).toFixed(2)} ={" "}
-                    {results.metrics.vperSent.toFixed(2)} × 2.203 - 2.486)
+                    = min(<b>{results.metrics.vperSent.toFixed(2)}</b> × 2.203 - 2.486, 7), Score:{" "}
+                    {(results.metricScores?.vperSent || 0).toFixed(2)}
                   </span>
                 </h4>
                 <p className="text-sm text-gray-700">
@@ -834,9 +828,8 @@ export function VocabularyAnalyzer() {
                 <h4 className="font-semibold">
                   POStypes
                   <span className="font-normal text-sm text-gray-600 ml-2">
-                    = {results.metrics.posTypes.toFixed(2)} (Score:{" "}
-                    {(results.metricScores?.posTypes || 0).toFixed(2)} ={" "}
-                    {results.metrics.posTypes.toFixed(2)} × 1.768 - 12.006)
+                    = min(<b>{results.metrics.posTypes.toFixed(2)}</b> × 1.768 - 12.006, 7), Score:{" "}
+                    {(results.metricScores?.posTypes || 0).toFixed(2)}
                   </span>
                 </h4>
                 <p className="text-sm text-gray-700">
@@ -852,9 +845,8 @@ export function VocabularyAnalyzer() {
                 <h4 className="font-semibold">
                   LenNP
                   <span className="font-normal text-sm text-gray-600 ml-2">
-                    = {results.metrics.lenNP.toFixed(2)} (Score:{" "}
-                    {(results.metricScores?.lenNP || 0).toFixed(2)} ={" "}
-                    {results.metrics.lenNP.toFixed(2)} × 2.629 - 6.697)
+                    = min(<b>{results.metrics.lenNP.toFixed(2)}</b> × 2.629 - 6.697, 7), Score:{" "}
+                    {(results.metricScores?.lenNP || 0).toFixed(2)}
                   </span>
                 </h4>
                 <p className="text-sm text-gray-700">
