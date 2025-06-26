@@ -731,7 +731,7 @@ export function VocabularyAnalyzer() {
                 </h4>
                 <p className="text-sm text-gray-700">
                   ARI is a readability index which is calculated using the
-                  following formula (using Python textstat library):
+                  following formula (with text statistics from wink-nlp):
                   <br />
                   4.71(characters/words) + 0.5(words/sentences) - 21.43
                   <br />
@@ -818,11 +818,11 @@ export function VocabularyAnalyzer() {
                   </span>
                 </h4>
                 <p className="text-sm text-gray-700">
-                  POStypes measures the diversity of parts of speech in the text
-                  based on spaCy. A higher value indicates a more varied use of
-                  parts of speech, which may suggest a higher text level. If
-                  this index is high, you can lower the text level by using
-                  simpler and less varied parts of speech.
+                  POStypes measures the average number of distinct parts of speech
+                  per sentence, based on grammatical analysis using wink-nlp. A higher
+                  value indicates a more varied use of grammatical structures, which
+                  may suggest a higher text level. If this index is high, you can
+                  lower the text level by using simpler and less varied parts of speech.
                 </p>
               </div>
 
@@ -836,13 +836,13 @@ export function VocabularyAnalyzer() {
                   </span>
                 </h4>
                 <p className="text-sm text-gray-700">
-                  LenNP represents the average length of noun phrases in the
-                  text per sentence. This value is calculated by performing a
-                  structural analysis using Python's spaCy (en_core_web_sm). A
-                  longer average length indicates more complex noun phrases,
-                  which may suggest a higher text level. If this index is high,
-                  you can lower the text level by using shorter and simpler noun
-                  phrases.
+                  LenNP represents the average length of noun phrases per
+                  sentence. This value is calculated by performing structural
+                  analysis using wink-nlp to identify noun phrases and their
+                  modifiers. A longer average length indicates more complex noun
+                  phrases, which may suggest a higher text level. If this index
+                  is high, you can lower the text level by using shorter and
+                  simpler noun phrases.
                 </p>
               </div>
             </div>
