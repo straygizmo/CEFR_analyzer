@@ -1,6 +1,9 @@
 # CEFR-J Level Analyzer
 
 A comprehensive web application for analyzing English text proficiency based on CEFR-J standards. This tool combines vocabulary complexity analysis with writing quality assessment to provide detailed feedback for language learners and educators.
+Very much inspired by these sites.
+https://cvla.langedu.jp/
+https://cwla.langedu.jp/
 
 ## Features
 
@@ -105,6 +108,8 @@ CEFR-J extends the Common European Framework with more granular levels for Japan
 ## Citation
 
 When using this tool for research, please cite:
+
+Uchida S., & Neigishi, M. (to appear) Estimating the CEFR-J level of English reading passages: Development and accuracy of CVLA3『英語コーパス研究』32. https://cvla.langedu.jp/static/Uchida_Negishi_2025.pdf
 
 Uchida, S. and Negishi, M. (2025). Assigning CEFR-J levels to English learners' writing: An approach using lexical metrics and generative AI. *Research Methods in Applied Linguistics, 4*(2), 100199. https://doi.org/10.1016/j.rmal.2025.100199
 
