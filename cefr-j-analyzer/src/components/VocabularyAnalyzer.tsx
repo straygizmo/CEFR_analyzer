@@ -645,6 +645,18 @@ export function VocabularyAnalyzer() {
               </div>
             </div>
 
+            <h3 className="text-xl font-bold mb-4">Metric Calculation Equations</h3>
+            <div className="bg-gray-50 p-4 rounded mb-6 font-mono text-sm">
+              <p>AvrDiff_CEFR = min(AvrDiff × 6.417 - 7.184, 7)</p>
+              <p>BperA_CEFR = min(BperA × 13.146 + 0.428, 7)</p>
+              <p>CVV1_CEFR = min(CVV1 × 1.1059 - 1.208, 7)</p>
+              <p>POStypes_CEFR = min(POStypes × 1.768 - 12.006, 7)</p>
+              <p>ARI_CEFR = min(ARI × 0.607 - 1.632, 7)</p>
+              <p>AvrFreqRank_CEFR = min(AvrFreqRank × 0.004 - 0.608, 7)</p>
+              <p>VperSent_CEFR = min(VperSent × 2.203 - 2.486, 7)</p>
+              <p>LenNP_CEFR = min(LenNP × 2.629 - 6.697, 7)</p>
+            </div>
+
             <h3 className="text-xl font-bold mb-4">Indicator Descriptions</h3>
             <div className="space-y-4">
               <div>
