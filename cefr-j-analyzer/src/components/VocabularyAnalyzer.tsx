@@ -146,7 +146,7 @@ export function VocabularyAnalyzer() {
     setError("");
   };
 
-  const getScorePercentage = (score: number) => (score / 7) * 100;
+  const getScorePercentage = (score: number) => (Math.max(0, Math.min(score, 7)) / 7) * 100;
 
   const getSubLevel = (
     metric: keyof VocabularyMetrics,
@@ -164,6 +164,20 @@ export function VocabularyAnalyzer() {
     }
 
     return closestLevel;
+  };
+
+  // Helper function to determine which metrics were excluded
+  const getExcludedMetrics = (metricScores: { [metric: string]: number } | undefined) => {
+    if (!metricScores) return { min: '', max: '' };
+    
+    // Create array of metric-score pairs and sort by score
+    const scores = Object.entries(metricScores).sort((a, b) => a[1] - b[1]);
+    
+    // The first one (lowest score) and last one (highest score) are excluded
+    return {
+      min: scores[0]?.[0] || '',
+      max: scores[scores.length - 1]?.[0] || ''
+    };
   };
 
   return (
@@ -232,6 +246,10 @@ export function VocabularyAnalyzer() {
         </div>
       ) : (
         <div className="space-y-6">
+          {(() => {
+            const excludedMetrics = getExcludedMetrics(results.metricScores);
+            return (
+              <>
           <h4 className="text-xl font-semibold">Input Text</h4>
           <div className="p-4 bg-gray-50 border rounded-lg">
             {results.coloredText.map((word, index) => (
@@ -412,28 +430,28 @@ export function VocabularyAnalyzer() {
                   <th className="border border-gray-300 px-4 py-2">
                     Input Text
                   </th>
-                  <td className="border border-gray-300 px-4 py-2">
+                  <td className={`border border-gray-300 px-4 py-2 ${excludedMetrics.min === 'avrDiff' || excludedMetrics.max === 'avrDiff' ? 'bg-gray-200' : ''}`}>
                     {results.metrics.avrDiff.toFixed(2)}
                   </td>
-                  <td className="border border-gray-300 px-4 py-2">
+                  <td className={`border border-gray-300 px-4 py-2 ${excludedMetrics.min === 'bperA' || excludedMetrics.max === 'bperA' ? 'bg-gray-200' : ''}`}>
                     {results.metrics.bperA.toFixed(2)}
                   </td>
-                  <td className="border border-gray-300 px-4 py-2 bg-gray-200">
+                  <td className={`border border-gray-300 px-4 py-2 ${excludedMetrics.min === 'cvv1' || excludedMetrics.max === 'cvv1' ? 'bg-gray-200' : ''}`}>
                     {results.metrics.cvv1.toFixed(2)}
                   </td>
-                  <td className="border border-gray-300 px-4 py-2">
+                  <td className={`border border-gray-300 px-4 py-2 ${excludedMetrics.min === 'avrFreqRank' || excludedMetrics.max === 'avrFreqRank' ? 'bg-gray-200' : ''}`}>
                     {results.metrics.avrFreqRank.toFixed(2)}
                   </td>
-                  <td className="border border-gray-300 px-4 py-2">
+                  <td className={`border border-gray-300 px-4 py-2 ${excludedMetrics.min === 'ari' || excludedMetrics.max === 'ari' ? 'bg-gray-200' : ''}`}>
                     {results.metrics.ari.toFixed(2)}
                   </td>
-                  <td className="border border-gray-300 px-4 py-2 bg-gray-200">
+                  <td className={`border border-gray-300 px-4 py-2 ${excludedMetrics.min === 'vperSent' || excludedMetrics.max === 'vperSent' ? 'bg-gray-200' : ''}`}>
                     {results.metrics.vperSent.toFixed(2)}
                   </td>
-                  <td className="border border-gray-300 px-4 py-2">
+                  <td className={`border border-gray-300 px-4 py-2 ${excludedMetrics.min === 'posTypes' || excludedMetrics.max === 'posTypes' ? 'bg-gray-200' : ''}`}>
                     {results.metrics.posTypes.toFixed(2)}
                   </td>
-                  <td className="border border-gray-300 px-4 py-2">
+                  <td className={`border border-gray-300 px-4 py-2 ${excludedMetrics.min === 'lenNP' || excludedMetrics.max === 'lenNP' ? 'bg-gray-200' : ''}`}>
                     {results.metrics.lenNP.toFixed(2)}
                   </td>
                 </tr>
@@ -566,28 +584,28 @@ export function VocabularyAnalyzer() {
                   <th className="border border-gray-300 px-4 py-2">
                     Sub-level
                   </th>
-                  <td className="border border-gray-300 px-4 py-2">
+                  <td className={`border border-gray-300 px-4 py-2 ${excludedMetrics.min === 'avrDiff' || excludedMetrics.max === 'avrDiff' ? 'bg-gray-200' : ''}`}>
                     {getSubLevel("avrDiff", results.metrics.avrDiff)}
                   </td>
-                  <td className="border border-gray-300 px-4 py-2">
+                  <td className={`border border-gray-300 px-4 py-2 ${excludedMetrics.min === 'bperA' || excludedMetrics.max === 'bperA' ? 'bg-gray-200' : ''}`}>
                     {getSubLevel("bperA", results.metrics.bperA)}
                   </td>
-                  <td className="border border-gray-300 px-4 py-2 bg-gray-200">
+                  <td className={`border border-gray-300 px-4 py-2 ${excludedMetrics.min === 'cvv1' || excludedMetrics.max === 'cvv1' ? 'bg-gray-200' : ''}`}>
                     {getSubLevel("cvv1", results.metrics.cvv1)}
                   </td>
-                  <td className="border border-gray-300 px-4 py-2">
+                  <td className={`border border-gray-300 px-4 py-2 ${excludedMetrics.min === 'avrFreqRank' || excludedMetrics.max === 'avrFreqRank' ? 'bg-gray-200' : ''}`}>
                     {getSubLevel("avrFreqRank", results.metrics.avrFreqRank)}
                   </td>
-                  <td className="border border-gray-300 px-4 py-2">
+                  <td className={`border border-gray-300 px-4 py-2 ${excludedMetrics.min === 'ari' || excludedMetrics.max === 'ari' ? 'bg-gray-200' : ''}`}>
                     {getSubLevel("ari", results.metrics.ari)}
                   </td>
-                  <td className="border border-gray-300 px-4 py-2 bg-gray-200">
+                  <td className={`border border-gray-300 px-4 py-2 ${excludedMetrics.min === 'vperSent' || excludedMetrics.max === 'vperSent' ? 'bg-gray-200' : ''}`}>
                     {getSubLevel("vperSent", results.metrics.vperSent)}
                   </td>
-                  <td className="border border-gray-300 px-4 py-2">
+                  <td className={`border border-gray-300 px-4 py-2 ${excludedMetrics.min === 'posTypes' || excludedMetrics.max === 'posTypes' ? 'bg-gray-200' : ''}`}>
                     {getSubLevel("posTypes", results.metrics.posTypes)}
                   </td>
-                  <td className="border border-gray-300 px-4 py-2">
+                  <td className={`border border-gray-300 px-4 py-2 ${excludedMetrics.min === 'lenNP' || excludedMetrics.max === 'lenNP' ? 'bg-gray-200' : ''}`}>
                     {getSubLevel("lenNP", results.metrics.lenNP)}
                   </td>
                 </tr>
@@ -596,7 +614,7 @@ export function VocabularyAnalyzer() {
           </div>
 
           <p className="text-sm text-gray-600">
-            #Cells highlighted in gray are not used for level assessment.
+            #Cells highlighted in gray are not used for level assessment (lowest and highest scores are excluded).
           </p>
 
           <div className="mt-8">
@@ -931,6 +949,9 @@ export function VocabularyAnalyzer() {
               Back
             </button>
           </div>
+              </>
+            );
+          })()}
         </div>
       )}
     </div>

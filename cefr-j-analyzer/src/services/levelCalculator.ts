@@ -213,14 +213,14 @@ function calculateMetrics(text: string, processedText: ProcessedText): Vocabular
 // Regression equations from the paper
 function calculateMetricScores(metrics: VocabularyMetrics): { [metric: string]: number } {
   return {
-    cvv1: Math.min(metrics.cvv1 * 1.1059 - 1.208, 7),
-    bperA: Math.min(metrics.bperA * 13.146 + 0.428, 7),
-    posTypes: Math.min(metrics.posTypes * 1.768 - 12.006, 7),
-    ari: Math.min(metrics.ari * 0.607 - 1.632, 7),
-    avrDiff: Math.min(metrics.avrDiff * 6.417 - 7.184, 7),
-    avrFreqRank: Math.min(metrics.avrFreqRank * 0.004 - 0.608, 7),
-    vperSent: Math.min(metrics.vperSent * 2.203 - 2.486, 7),
-    lenNP: Math.min(metrics.lenNP * 2.629 - 6.697, 7)
+    cvv1: Math.max(0, Math.min(metrics.cvv1 * 1.1059 - 1.208, 7)),
+    bperA: Math.max(0, Math.min(metrics.bperA * 13.146 + 0.428, 7)),
+    posTypes: Math.max(0, Math.min(metrics.posTypes * 1.768 - 12.006, 7)),
+    ari: Math.max(0, Math.min(metrics.ari * 0.607 - 1.632, 7)),
+    avrDiff: Math.max(0, Math.min(metrics.avrDiff * 6.417 - 7.184, 7)),
+    avrFreqRank: Math.max(0, Math.min(metrics.avrFreqRank * 0.004 - 0.608, 7)),
+    vperSent: Math.max(0, Math.min(metrics.vperSent * 2.203 - 2.486, 7)),
+    lenNP: Math.max(0, Math.min(metrics.lenNP * 2.629 - 6.697, 7))
   };
 }
 
