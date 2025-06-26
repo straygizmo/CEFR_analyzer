@@ -180,25 +180,21 @@ function calculatePOStypes(processedText: ProcessedText): number {
 }
 
 function calculateLenNP(processedText: ProcessedText): number {
-  // Average length of noun phrases per sentence
+  // Average length of noun phrases across all sentences
+  // This matches the averageLengthPerSentence in nounPhraseAnalyzer
   let totalNPLength = 0;
-  let sentenceCount = 0;
+  let totalNPCount = 0;
   
   for (const sentence of processedText.sentences) {
     const nounPhrases = extractNounPhrases(sentence);
-    let sentenceNPLength = 0;
     
     for (const np of nounPhrases) {
-      sentenceNPLength += np.length;
-    }
-    
-    if (nounPhrases.length > 0) {
-      totalNPLength += sentenceNPLength / nounPhrases.length;
-      sentenceCount++;
+      totalNPLength += np.length;
+      totalNPCount++;
     }
   }
   
-  return sentenceCount > 0 ? totalNPLength / sentenceCount : 0;
+  return totalNPCount > 0 ? totalNPLength / totalNPCount : 0;
 }
 
 function calculateMetrics(text: string, processedText: ProcessedText): VocabularyMetrics {
