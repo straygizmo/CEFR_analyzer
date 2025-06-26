@@ -1,6 +1,6 @@
 import type { ProcessedText, Token } from './textProcessor';
 import { extractNounPhrases, calculateARI } from './textProcessor';
-import { getWordLevel as getWordLevelFromIndex } from '../data/vocabulary-index';
+import wordLookup from '../data/word_lookup.json';
 import { cocaFrequency } from '../data/coca-frequency';
 
 export interface VocabularyMetrics {
@@ -45,7 +45,16 @@ export interface ColoredWord {
 
 
 function getWordLevel(word: string): string {
-  return getWordLevelFromIndex(word);
+  const lower = word.toLowerCase();
+  
+  // Direct lookup in word_lookup.json
+  const entry = wordLookup[lower as keyof typeof wordLookup];
+  if (entry && entry.CEFR) {
+    return entry.CEFR;
+  }
+  
+  // If not found, return 'NA'
+  return 'NA';
 }
 
 function getWordColor(level: string, isContentWord: boolean): { color: string; bold: boolean } {
