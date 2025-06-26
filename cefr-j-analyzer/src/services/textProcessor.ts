@@ -360,14 +360,18 @@ export function extractNounPhrases(sentence: Sentence): string[][] {
       let startIdx = i;
       
       // Optional determiner
-      if (tokens[i] && (tokens[i].pos === 'DT' || tokens[i].pos === 'PDT' || tokens[i].pos === 'PRP$' || tokens[i].pos === 'WP$')) {
+      if (tokens[i] && (tokens[i].pos === 'DET' || tokens[i].pos === 'PRON' || tokens[i].pos === 'DT' || tokens[i].pos === 'PDT' || tokens[i].pos === 'PRP$' || tokens[i].pos === 'WP$')) {
         currentPhrase.push(tokens[i].word);
         i++;
       }
       
       // Adjectives and nouns (including compound nouns)
       while (i < tokens.length && 
-             (tokens[i].pos?.startsWith('JJ') || 
+             (tokens[i].pos === 'ADJ' || 
+              tokens[i].pos === 'NOUN' ||
+              tokens[i].pos === 'PROPN' || // Proper noun
+              tokens[i].pos === 'NUM' || // Numbers
+              tokens[i].pos?.startsWith('JJ') || // Penn Treebank fallback
               tokens[i].pos?.startsWith('NN') ||
               tokens[i].pos === 'VBG' || // gerunds can act as modifiers
               tokens[i].pos === 'VBN' || // past participles as modifiers
@@ -379,7 +383,7 @@ export function extractNounPhrases(sentence: Sentence): string[][] {
       // Check if we have at least one noun
       let hasNoun = false;
       for (let j = startIdx; j < i; j++) {
-        if (tokens[j].pos?.startsWith('NN')) {
+        if (tokens[j].pos === 'NOUN' || tokens[j].pos === 'PROPN' || tokens[j].pos?.startsWith('NN')) {
           hasNoun = true;
           break;
         }
@@ -387,13 +391,13 @@ export function extractNounPhrases(sentence: Sentence): string[][] {
       
       if (hasNoun && currentPhrase.length > 0) {
         // Check for prepositional phrases that extend the noun phrase
-        if (i < tokens.length && tokens[i].pos === 'IN') {
+        if (i < tokens.length && (tokens[i].pos === 'ADP' || tokens[i].pos === 'IN')) {
           const prepStart = i;
           currentPhrase.push(tokens[i].word); // Add preposition
           i++;
           
           // Optional determiner after preposition
-          if (i < tokens.length && (tokens[i].pos === 'DT' || tokens[i].pos === 'PDT')) {
+          if (i < tokens.length && (tokens[i].pos === 'DET' || tokens[i].pos === 'DT' || tokens[i].pos === 'PDT')) {
             currentPhrase.push(tokens[i].word);
             i++;
           }
@@ -401,11 +405,15 @@ export function extractNounPhrases(sentence: Sentence): string[][] {
           // Adjectives and nouns after preposition
           let foundNounAfterPrep = false;
           while (i < tokens.length && 
-                 (tokens[i].pos?.startsWith('JJ') || 
+                 (tokens[i].pos === 'ADJ' || 
+                  tokens[i].pos === 'NOUN' ||
+                  tokens[i].pos === 'PROPN' ||
+                  tokens[i].pos === 'NUM' ||
+                  tokens[i].pos?.startsWith('JJ') || 
                   tokens[i].pos?.startsWith('NN') ||
                   tokens[i].pos === 'VBG' ||
                   tokens[i].pos === 'VBN')) {
-            if (tokens[i].pos?.startsWith('NN')) {
+            if (tokens[i].pos === 'NOUN' || tokens[i].pos === 'PROPN' || tokens[i].pos?.startsWith('NN')) {
               foundNounAfterPrep = true;
             }
             currentPhrase.push(tokens[i].word);
@@ -443,20 +451,20 @@ export function extractNounPhrases(sentence: Sentence): string[][] {
       let startIdx = i;
       
       // Start with determiner or possessive
-      if (tokens[i].pos === 'DET' || tokens[i].pos === 'PRON') {
+      if (tokens[i] && (tokens[i].pos === 'DET' || tokens[i].pos === 'PRON' || tokens[i].pos === 'DT' || tokens[i].pos?.startsWith('PRP'))) {
         currentPhrase.push(tokens[i].word);
         i++;
       }
       
       // Collect modifiers (adjectives, adverbs modifying adjectives)
-      while (i < tokens.length && (tokens[i].pos === 'ADJ' || tokens[i].pos === 'ADV')) {
+      while (i < tokens.length && (tokens[i].pos === 'ADJ' || tokens[i].pos === 'ADV' || tokens[i].pos?.startsWith('JJ') || tokens[i].pos?.startsWith('RB'))) {
         currentPhrase.push(tokens[i].word);
         i++;
       }
       
       // Must have at least one noun
       let nounCount = 0;
-      while (i < tokens.length && tokens[i].pos === 'NOUN') {
+      while (i < tokens.length && (tokens[i].pos === 'NOUN' || tokens[i].pos === 'PROPN' || tokens[i].pos?.startsWith('NN'))) {
         currentPhrase.push(tokens[i].word);
         nounCount++;
         i++;
@@ -464,24 +472,24 @@ export function extractNounPhrases(sentence: Sentence): string[][] {
       
       if (nounCount > 0 && currentPhrase.length > 0) {
         // Check for prepositional extension
-        if (i < tokens.length && tokens[i].pos === 'PREP') {
+        if (i < tokens.length && (tokens[i].pos === 'ADP' || tokens[i].pos === 'PREP' || tokens[i].pos === 'IN')) {
           const tempPhrase = [...currentPhrase];
           tempPhrase.push(tokens[i].word);
           i++;
           
           // Look for noun phrase after preposition
           let prepPhraseStart = i;
-          if (i < tokens.length && tokens[i].pos === 'DET') {
+          if (i < tokens.length && (tokens[i].pos === 'DET' || tokens[i].pos === 'DT')) {
             tempPhrase.push(tokens[i].word);
             i++;
           }
           
-          while (i < tokens.length && tokens[i].pos === 'ADJ') {
+          while (i < tokens.length && (tokens[i].pos === 'ADJ' || tokens[i].pos?.startsWith('JJ'))) {
             tempPhrase.push(tokens[i].word);
             i++;
           }
           
-          if (i < tokens.length && tokens[i].pos === 'NOUN') {
+          if (i < tokens.length && (tokens[i].pos === 'NOUN' || tokens[i].pos === 'PROPN' || tokens[i].pos?.startsWith('NN'))) {
             tempPhrase.push(tokens[i].word);
             currentPhrase = tempPhrase;
             i++;
@@ -492,7 +500,7 @@ export function extractNounPhrases(sentence: Sentence): string[][] {
         }
         
         nounPhrases.push(currentPhrase);
-      } else if (currentPhrase.length === 0 && i < tokens.length && tokens[i].pos === 'NOUN') {
+      } else if (currentPhrase.length === 0 && i < tokens.length && (tokens[i].pos === 'NOUN' || tokens[i].pos === 'PROPN' || tokens[i].pos?.startsWith('NN'))) {
         // Single noun
         nounPhrases.push([tokens[i].word]);
         i++;

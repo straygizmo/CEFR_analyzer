@@ -7,6 +7,8 @@ import type {
 import { analyzeVocabularyLevel } from "../services/levelCalculator";
 import { analyzeVerbsPerSentence } from "../services/verbAnalyzer";
 import type { VerbAnalysisResult } from "../services/verbAnalyzer";
+import { analyzeNounPhrasesPerSentence } from "../services/nounPhraseAnalyzer";
+import type { NounPhraseAnalysisResult } from "../services/nounPhraseAnalyzer";
 
 const SAMPLE_TEXT = `Writing is the act of recording language on a visual medium using a set of symbols. The symbols must be known to others, so that the text may be read. A text may also use other visual systems, such as illustrations and decorations. These are not called writing, but may help the message work. Usually, all educated people in a country use the same writing system to record the same language. To be able to read and write is to be literate.`;
 
@@ -77,6 +79,7 @@ export function VocabularyAnalyzer() {
   const [text, setText] = useState("");
   const [results, setResults] = useState<VocabularyLevel | null>(null);
   const [verbAnalysis, setVerbAnalysis] = useState<VerbAnalysisResult | null>(null);
+  const [nounPhraseAnalysis, setNounPhraseAnalysis] = useState<NounPhraseAnalysisResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState("");
 
@@ -111,8 +114,13 @@ export function VocabularyAnalyzer() {
       const verbAnalysisResults = analyzeVerbsPerSentence(processedText);
       console.log("Verb analysis complete:", verbAnalysisResults);
       
+      console.log("Analyzing noun phrases per sentence...");
+      const nounPhraseAnalysisResults = analyzeNounPhrasesPerSentence(processedText);
+      console.log("Noun phrase analysis complete:", nounPhraseAnalysisResults);
+      
       setResults(analysisResults);
       setVerbAnalysis(verbAnalysisResults);
+      setNounPhraseAnalysis(nounPhraseAnalysisResults);
     } catch (error) {
       console.error("Analysis error:", error);
       console.error("Error stack:", (error as Error).stack);
@@ -126,6 +134,7 @@ export function VocabularyAnalyzer() {
     setText(SAMPLE_TEXT);
     setResults(null);
     setVerbAnalysis(null);
+    setNounPhraseAnalysis(null);
     setError("");
   };
 
@@ -133,6 +142,7 @@ export function VocabularyAnalyzer() {
     setText("");
     setResults(null);
     setVerbAnalysis(null);
+    setNounPhraseAnalysis(null);
     setError("");
   };
 
@@ -844,6 +854,63 @@ export function VocabularyAnalyzer() {
                   is high, you can lower the text level by using shorter and
                   simpler noun phrases.
                 </p>
+                {nounPhraseAnalysis && (
+                  <div className="mt-4">
+                    <details className="bg-gray-50 p-4 rounded">
+                      <summary className="cursor-pointer font-semibold text-sm">
+                        Click to view detailed noun phrases per sentence
+                      </summary>
+                      <div className="mt-3 overflow-x-auto">
+                        <table className="w-full text-sm border-collapse border border-gray-300">
+                          <thead className="bg-gray-100">
+                            <tr>
+                              <th className="border border-gray-300 px-3 py-2 text-left">Sentence #</th>
+                              <th className="border border-gray-300 px-3 py-2 text-left">Sentence Text</th>
+                              <th className="border border-gray-300 px-3 py-2 text-left">Noun Phrases Found</th>
+                              <th className="border border-gray-300 px-3 py-2 text-center">Count</th>
+                              <th className="border border-gray-300 px-3 py-2 text-center">Avg Length</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {nounPhraseAnalysis.sentences.map((sentence) => (
+                              <tr key={sentence.sentenceNumber}>
+                                <td className="border border-gray-300 px-3 py-2 text-center">
+                                  {sentence.sentenceNumber}
+                                </td>
+                                <td className="border border-gray-300 px-3 py-2">
+                                  {sentence.sentenceText}
+                                </td>
+                                <td className="border border-gray-300 px-3 py-2">
+                                  {sentence.nounPhrases.join(", ") || "-"}
+                                </td>
+                                <td className="border border-gray-300 px-3 py-2 text-center">
+                                  {sentence.nounPhraseCount}
+                                </td>
+                                <td className="border border-gray-300 px-3 py-2 text-center">
+                                  {sentence.averageLength.toFixed(2)}
+                                </td>
+                              </tr>
+                            ))}
+                            <tr className="font-bold bg-gray-100">
+                              <td className="border border-gray-300 px-3 py-2 text-center" colSpan={2}>
+                                Average (LenNP)
+                              </td>
+                              <td className="border border-gray-300 px-3 py-2">
+                                Total noun phrases: {nounPhraseAnalysis.totalNounPhrases} / Total sentences: {nounPhraseAnalysis.totalSentences}
+                              </td>
+                              <td className="border border-gray-300 px-3 py-2 text-center">
+                                {nounPhraseAnalysis.averageNounPhrasesPerSentence.toFixed(2)}
+                              </td>
+                              <td className="border border-gray-300 px-3 py-2 text-center">
+                                {nounPhraseAnalysis.averageLengthPerSentence.toFixed(2)}
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </details>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -853,6 +920,7 @@ export function VocabularyAnalyzer() {
               onClick={() => {
                 setResults(null);
                 setVerbAnalysis(null);
+                setNounPhraseAnalysis(null);
               }}
               className="px-6 py-2 bg-gray-500 text-white hover:bg-gray-600 rounded transition-colors"
             >
