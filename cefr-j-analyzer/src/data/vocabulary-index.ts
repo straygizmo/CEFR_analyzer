@@ -1,6 +1,9 @@
 // CEFR-J Vocabulary Index
 // Generated from vocabulary-index.json
 
+// Import lemmatization function at the top
+import { getLemma } from './lemmatization-map';
+
 export const vocabularyIndex: { [key: string]: string[] } = {
   "'m": [
     "A1"
@@ -26757,9 +26760,6 @@ export const vocabularyIndex: { [key: string]: string[] } = {
     "B2"
   ]
 };
-
-// Import lemmatization function
-import { getLemma } from './lemmatization-map';
 
 // Add a function to get word level with proper handling
 export function getWordLevel(word: string): string {

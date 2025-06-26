@@ -63,7 +63,6 @@ function getWordColor(level: string, isContentWord: boolean): { color: string; b
 }
 
 function calculateAvrDiff(tokens: Token[]): number {
-  const contentPOS = ['NOUN', 'VERB', 'ADJ', 'ADV'];
   const levelValues: { [key: string]: number } = {
     'A1': 1, 'A2': 2, 'B1': 3, 'B2': 4, 'C1': 5, 'C2': 6
   };
@@ -72,7 +71,9 @@ function calculateAvrDiff(tokens: Token[]): number {
   let count = 0;
   
   for (const token of tokens) {
-    if (contentPOS.includes(token.pos)) {
+    // Check for content words using Penn Treebank tags
+    if (token.pos?.startsWith('NN') || token.pos?.startsWith('VB') || 
+        token.pos?.startsWith('JJ') || token.pos?.startsWith('RB')) {
       const level = getWordLevel(token.lemma);
       if (level !== 'NA') {
         sum += levelValues[level] || 3; // Default to B1 if unknown
@@ -85,12 +86,13 @@ function calculateAvrDiff(tokens: Token[]): number {
 }
 
 function calculateBperA(tokens: Token[]): number {
-  const contentPOS = ['NOUN', 'VERB', 'ADJ', 'ADV'];
   let aCount = 0;
   let bCount = 0;
   
   for (const token of tokens) {
-    if (contentPOS.includes(token.pos)) {
+    // Check for content words using Penn Treebank tags
+    if (token.pos?.startsWith('NN') || token.pos?.startsWith('VB') || 
+        token.pos?.startsWith('JJ') || token.pos?.startsWith('RB')) {
       const level = getWordLevel(token.lemma);
       if (level === 'A1' || level === 'A2') aCount++;
       else if (level === 'B1' || level === 'B2') bCount++;
@@ -107,7 +109,7 @@ function calculateCVV1(tokens: Token[]): number {
   let verbTokens = 0;
   
   for (const token of tokens) {
-    if (token.pos === 'VERB' && token.lemma.toLowerCase() !== 'be') {
+    if (token.pos?.startsWith('VB') && token.lemma.toLowerCase() !== 'be') {
       verbTypes.add(token.lemma.toLowerCase());
       verbTokens++;
     }
@@ -153,7 +155,7 @@ function calculateAvrFreqRank(tokens: Token[]): number {
 function calculateVperSent(processedText: ProcessedText): number {
   if (processedText.sentenceCount === 0) return 0;
   
-  const totalVerbs = processedText.tokens.filter(t => t.pos === 'VERB' || t.pos === 'AUX').length;
+  const totalVerbs = processedText.tokens.filter(t => t.pos?.startsWith('VB') || t.pos === 'MD').length;
   return totalVerbs / processedText.sentenceCount;
 }
 
@@ -166,7 +168,8 @@ function calculatePOStypes(processedText: ProcessedText): number {
   for (const sentence of processedText.sentences) {
     const posInSentence = new Set<string>();
     for (const token of sentence.tokens) {
-      if (token.pos !== 'PUNCT' && token.pos !== 'SPACE') {
+      // Skip punctuation and special symbols
+      if (token.pos && !['PUNCT', 'SPACE', '.', ',', ':', ';', '!', '?', '-', '--', '(', ')', '[', ']', '{', '}', '"', "'", '`', '``', "''"].includes(token.pos)) {
         posInSentence.add(token.pos);
       }
     }
@@ -258,7 +261,6 @@ function scoreToLevel(score: number): string {
 
 function createColoredText(text: string, processedText: ProcessedText): ColoredWord[] {
   const coloredWords: ColoredWord[] = [];
-  const contentPOS = ['NOUN', 'VERB', 'ADJ', 'ADV'];
   
   // Split text preserving whitespace and punctuation
   const parts = text.split(/(\s+|[.,!?;:'"-])/);
@@ -283,7 +285,9 @@ function createColoredText(text: string, processedText: ProcessedText): ColoredW
       const token = tokenMap.get(part.toLowerCase());
       if (token) {
         const level = getWordLevel(token.lemma);
-        const isContentWord = contentPOS.includes(token.pos);
+        // Check for content words using Penn Treebank tags
+        const isContentWord = token.pos?.startsWith('NN') || token.pos?.startsWith('VB') || 
+                             token.pos?.startsWith('JJ') || token.pos?.startsWith('RB');
         const { color, bold } = getWordColor(level, isContentWord);
         
         coloredWords.push({
@@ -312,11 +316,12 @@ function calculateWordDistribution(tokens: Token[]): { [level: string]: number }
     'A1': 0, 'A2': 0, 'B1': 0, 'B2': 0, 'C1': 0, 'C2': 0, 'NA': 0
   };
   
-  const contentPOS = ['NOUN', 'VERB', 'ADJ', 'ADV'];
   let totalContentWords = 0;
   
   for (const token of tokens) {
-    if (contentPOS.includes(token.pos)) {
+    // Check for content words using Penn Treebank tags
+    if (token.pos?.startsWith('NN') || token.pos?.startsWith('VB') || 
+        token.pos?.startsWith('JJ') || token.pos?.startsWith('RB')) {
       const level = getWordLevel(token.lemma);
       distribution[level] = (distribution[level] || 0) + 1;
       totalContentWords++;
@@ -338,7 +343,7 @@ function calculateVerbStatistics(tokens: Token[]): { uniqueVerbs: number, totalV
   let verbTokens = 0;
   
   for (const token of tokens) {
-    if (token.pos === 'VERB' && token.lemma.toLowerCase() !== 'be') {
+    if (token.pos?.startsWith('VB') && token.lemma.toLowerCase() !== 'be') {
       verbTypes.add(token.lemma.toLowerCase());
       verbTokens++;
     }
@@ -357,7 +362,6 @@ function calculateLevelStatistics(tokens: Token[]): { stats: { [level: string]: 
     'C2': { count: 0, avrIdx: 0, verb: 0, noun: 0, adjective: 0 }
   };
   
-  const contentPOS = ['NOUN', 'VERB', 'ADJ', 'ADV'];
   const levelValues: { [key: string]: number } = {
     'A1': 1, 'A2': 2, 'B1': 3, 'B2': 4, 'C1': 5, 'C2': 6
   };
@@ -366,17 +370,19 @@ function calculateLevelStatistics(tokens: Token[]): { stats: { [level: string]: 
   
   // Count words by level and POS
   for (const token of tokens) {
-    if (contentPOS.includes(token.pos)) {
+    // Check for content words using Penn Treebank tags
+    if (token.pos?.startsWith('NN') || token.pos?.startsWith('VB') || 
+        token.pos?.startsWith('JJ') || token.pos?.startsWith('RB')) {
       const level = getWordLevel(token.lemma);
       if (level !== 'NA' && levelStats[level]) {
         levelStats[level].count++;
         
         // Count by POS
-        if (token.pos === 'VERB') {
+        if (token.pos?.startsWith('VB')) {
           levelStats[level].verb++;
-        } else if (token.pos === 'NOUN') {
+        } else if (token.pos?.startsWith('NN')) {
           levelStats[level].noun++;
-        } else if (token.pos === 'ADJ') {
+        } else if (token.pos?.startsWith('JJ')) {
           levelStats[level].adjective++;
         }
         

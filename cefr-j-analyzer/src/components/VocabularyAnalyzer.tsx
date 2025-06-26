@@ -95,15 +95,27 @@ export function VocabularyAnalyzer() {
     setError("");
 
     try {
+      console.log("Starting analysis...");
       // Simulate processing delay
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
+      console.log("Processing text...");
       const processedText = processText(text);
+      console.log("Text processed:", processedText);
+      
+      console.log("Analyzing vocabulary level...");
       const analysisResults = analyzeVocabularyLevel(text, processedText);
+      console.log("Vocabulary analysis complete:", analysisResults);
+      
+      console.log("Analyzing verbs per sentence...");
       const verbAnalysisResults = analyzeVerbsPerSentence(processedText);
+      console.log("Verb analysis complete:", verbAnalysisResults);
+      
       setResults(analysisResults);
       setVerbAnalysis(verbAnalysisResults);
-    } catch {
+    } catch (error) {
+      console.error("Analysis error:", error);
+      console.error("Error stack:", (error as Error).stack);
       setError("An error occurred during analysis. Please try again.");
     } finally {
       setIsAnalyzing(false);

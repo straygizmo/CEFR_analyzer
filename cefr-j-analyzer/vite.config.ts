@@ -17,4 +17,12 @@ if (!crypto.hash) {
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  optimizeDeps: {
+    include: ['wink-nlp', 'wink-eng-lite-web-model'],
+  },
+  build: {
+    commonjsOptions: {
+      include: [/wink-nlp/, /wink-eng-lite-web-model/, /node_modules/],
+    },
+  },
 })
